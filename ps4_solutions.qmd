@@ -1,0 +1,247 @@
+---
+title: "Problem Set 4"
+format: pdf
+---
+
+```{r, echo = FALSE, eval = TRUE} 
+set.seed(378213)
+x <- seq(1, 9, by = 1)
+Y <- matrix(sample((-3):3, 9*10000, replace = TRUE), nrow = 9, ncol = 10000)
+```
+
+1. (a) 
+
+```{r, echo = TRUE, eval = TRUE}
+Z <- apply(Y, 2, function(x) {
+  c(x[1], mean(x[1:2]), mean(x[2:3]), mean(x[3:4]), mean(x[4:5]), mean(x[5:6]),
+    mean(x[6:7]), mean(x[7:8]), mean(x[8:9]))
+})
+W <- apply(Y, 2, function(x) {
+  c(x[1], mean(x[1:2]), mean(x[1:3]), mean(x[2:4]), mean(x[3:5]), mean(x[4:6]),
+    mean(x[5:7]), mean(x[6:8]), mean(x[7:9]))
+})
+ymean <- apply(Y, 1, mean)
+zmean <- apply(Z, 1, mean)
+wmean <- apply(W, 1, mean)
+ysd <- apply(Y, 1, sd)
+zsd <- apply(Z, 1, sd)
+wsd <- apply(W, 1, sd)
+```
+
+1. (b) 
+
+```{r, eval = TRUE, echo = FALSE}
+par(mfrow = c(1, 2))
+plot(x, ymean, pch = 16, ylim = c(-1, 3), ylab = "Row Means")
+points(x, zmean, pch = 16, col = "blue")
+points(x, wmean, pch = 16, col = "red")
+points(x, rep(0, length(x)), pch = 4)
+legend("topleft", col = c("black", "blue", "red", "black"), legend = c("Y", "Z", "W", "Truth"),
+       pch = c(rep(16, 3), 4))
+
+plot(x, ysd, pch = 16,
+     ylim = c(0, 5), ylab = "Row SDs")
+points(x, zsd, pch = 16, col = "blue")
+points(x, wsd, pch = 16, col = "red")
+legend("topright", col = c("black", "blue", "red"), legend = c("Y", "Z", "W"),
+       pch = 16)
+```
+
+1. (c) Add sentence here. 
+
+1. (d) 
+
+```{r, eval = TRUE, echo = FALSE}
+Y <- x + Y 
+Z <- apply(Y, 2, function(x) {
+  c(x[1], mean(x[1:2]), mean(x[2:3]), mean(x[3:4]), mean(x[4:5]), mean(x[5:6]),
+    mean(x[6:7]), mean(x[7:8]), mean(x[8:9]))
+})
+W <- apply(Y, 2, function(x) {
+  c(x[1], mean(x[1:2]), mean(x[1:3]), mean(x[2:4]), mean(x[3:5]), mean(x[4:6]),
+    mean(x[5:7]), mean(x[6:8]), mean(x[7:9]))
+})
+ymean <- apply(Y, 1, mean)
+zmean <- apply(Z, 1, mean)
+wmean <- apply(W, 1, mean)
+ysd <- apply(Y, 1, sd)
+zsd <- apply(Z, 1, sd)
+wsd <- apply(W, 1, sd)
+
+par(mfrow = c(1, 2))
+plot(x, ymean, pch = 16, ylim = c(0, 13), ylab = "Row Means")
+points(x, zmean, pch = 16, col = "blue")
+points(x, wmean, pch = 16, col = "red")
+points(x, x, pch = 4)
+legend("topleft", col = c("black", "blue", "red", "black"), legend = c("Y", "Z", "W", "Truth"),
+       pch = c(rep(16, 3), 4))
+
+plot(x, ysd, pch = 16,
+     ylim = c(0, 5), ylab = "Row SDs")
+points(x, zsd, pch = 16, col = "blue")
+points(x, wsd, pch = 16, col = "red")
+legend("topright", col = c("black", "blue", "red"), legend = c("Y", "Z", "W"),
+       pch = 16)
+```
+
+```{r, echo = FALSE, eval = TRUE}
+Y <- matrix(c(0.5, 2, 0.5, 2, 0.5, 1, 1, 0.5), 
+            nrow = 4, ncol = 2)
+x <- seq(0.01, 6, by = 0.01)
+```
+
+2. (a)
+
+```{r, eval = TRUE, echo = TRUE}
+W <- matrix(NA, ncol = 100000, nrow = 4)
+for (i in 1:nrow(Y)) {
+  W[i, ] <- rgamma(ncol(W), shape = Y[i, 1], rate = Y[i, 2])
+}
+```
+
+2. (b)
+
+```{r, eval = TRUE, echo = TRUE}
+V <- matrix(NA, ncol = 100000, nrow = 4)
+for (i in 1:nrow(Y)) {
+  V[i, ] <- rgamma(ncol(V), shape = Y[i, 1], rate = 1)/Y[i, 2]
+}
+```
+
+
+2. (c) 
+
+```{r, eval = TRUE, echo = TRUE}
+pV <- pW <- matrix(NA, ncol = length(x) - 1, nrow = 4)
+for (j in 1:ncol(pV)) {
+  for (i in 1:nrow(V)) {
+  pV[i, j] <- mean(V[i, ] > x[j] & V[i, ] <= x[j + 1])
+  pW[i, j] <- mean(W[i, ] > x[j] & W[i, ] <= x[j + 1])
+  }
+}
+```
+
+2. (d) 
+
+```{r, eval = TRUE, echo = TRUE}
+xmid <- (x[-1] + x[-length(x)])/2
+```
+
+2. (e)
+
+```{r, eval = TRUE, echo = FALSE}
+plot(xmid, pV[1, ], type = "n", ylim = c(0, 0.1), 
+     xlab = "x", ylab = "Proportion of Values in Interval")
+for (i in 1:4) {
+  lines(xmid, pV[i, ], col = i, lty = 2)
+  lines(xmid, pW[i, ], col = i)
+}
+legend("topright", col = 1:4, 
+       legend = c("(0.5, 0.5)", "(2, 1)", "(0.5, 1)", "(2, 0.5)"), 
+       lty = 1,
+       title = "(Shape, Rate)")
+legend("topleft", col = c(1, 1), 
+       legend = c("1", "2"), 
+       lty = c(1, 2),
+       title = "Simulation Method")
+```
+
+2. (f) We can see that the approaches seem to be equivalent, as we would expect, because they provide random variables that have similar distributions as measured by the the frequency that they take on certain values.
+
+2. (g)
+
+```{r, eval = TRUE, echo = FALSE}
+qV <- qW <- matrix(NA, ncol = length(x), nrow = 4)
+for (j in 1:ncol(qV)) {
+  for (i in 1:nrow(V)) {
+  qV[i, j] <- mean(V[i, ] <= x[j])
+  qW[i, j] <- mean(W[i, ] <= x[j])
+  }
+}
+```
+
+```{r, eval = TRUE, echo = TRUE}
+qT <- matrix(NA, ncol = length(x), nrow = 4)
+for (i in 1:nrow(Y)) {
+  qT[i, ] <- pgamma(x, shape = Y[i, 1], rate = Y[i, 2])
+}
+```
+
+
+2. (h)
+
+```{r, eval = TRUE, echo = FALSE}
+plot(x, qV[1, ], type = "n", ylim = c(0, 5), 
+     xlab = "x", ylab = "Proportion Less than or Equal to x")
+for (i in 1:4) {
+  lines(x, qV[i, ], col = i, lty = 2)
+  lines(x, qW[i, ], col = i)
+  lines(x, qT[i, ], col = i, lty = 3)
+}
+legend("topright", col = 1:4, 
+       legend = c("(0.5, 0.5)", "(2, 1)", "(0.5, 1)", "(2, 0.5)"), 
+       lty = 1,
+       title = "(Shape, Rate)")
+legend("topleft", col = c(1, 1, 1), 
+       legend = c("Sim. Method 1", "Sim. Method 2", "Truth"), 
+       lty = c(1, 2, 3))
+```
+
+
+2. (i) The lines are very similar, because they are all approximating or explicitly computing the same quantity, which is the CDF of the corresponding gamma distribution.
+
+3. (a)
+
+```{r, eval = TRUE, echo = TRUE}
+z <- rnorm(3)
+```
+
+3. (b) 
+
+```{r, eval = TRUE, echo = TRUE}
+y <- rep(NA, length(z))
+y[1] <- z[1]
+for (i in 2:length(z)) {
+  y[i] <- 0.5*y[i - 1] + z[i]*sqrt(0.75)
+}
+```
+
+3. (c) 
+
+```{r, eval = TRUE, echo = TRUE}
+D <- matrix(0, length(z), length(z))
+D[1, 1] <- 1
+D[2, 1] <- 0.5
+D[2, 2] <- sqrt(0.75)
+D[3, 1] <- 0.5^2
+D[3, 2] <- 0.5*sqrt(0.75)
+D[3, 3] <- sqrt(0.75)
+```
+
+3. (d) 
+
+```{r, eval = FALSE, echo = TRUE}
+all.equal(c(y), c(D%*%z))
+```
+
+3. (e) 
+
+```{r, eval = TRUE, echo = FALSE}
+C <- matrix(NA, nrow = 3, ncol = 3)
+for (i in 1:nrow(C)) {
+  for (j in 1:ncol(C)) {
+    C[i, j] <- 0.5^abs(i - j)
+  }
+}
+```
+
+```{r, eval = FALSE, echo = TRUE}
+t(chol(C))
+```
+
+3. (f) 
+
+```{r, eval = TRUE, echo = TRUE}
+plot(c(D), c(t(chol(C))), xlab = "Elements of D", ylab = "Elements of t(chol(C))",
+     pch = 16)
+```

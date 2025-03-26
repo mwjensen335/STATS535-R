@@ -1,0 +1,30 @@
+---
+title: "Problem Set 1 Solutions"
+format: pdf
+---
+
+1. 
+
+```{r, eval = TRUE, echo = FALSE}
+Y <- matrix(c(0.5, 2, 0.5, 1, 0, 1, 1, 2, 2, 2), nrow = 2, ncol = 5)
+```
+
+```{r, eval = TRUE, echo = FALSE}
+colnames(Y) <- c("Shape", "Rate", "Mode", "Mean", "Variance")
+row.names(Y) <- c("Choice 1", "Choice 2")
+```
+
+```{r, eval = TRUE, echo = FALSE}
+knitr::kable(Y)
+```
+
+2.
+
+```{r, eval = TRUE, echo = FALSE}
+curve(dgamma(x, shape = 0.5, rate = 0.5), ylab = "Density", col = "darkgreen")
+curve(dgamma(x, shape = 2, rate = 1), ylab = "Density", col = "blue", add = TRUE, lty = 2)
+legend("topright", col = c("darkgreen", "blue"), lty = c(1, 2),
+       legend = c("Choice 1", "Choice 2"))
+```
+
+3. $F(x) = (\frac{1}{\Gamma(\alpha)})\gamma(\alpha, \lambda x)$

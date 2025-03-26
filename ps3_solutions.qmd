@@ -1,0 +1,157 @@
+---
+title: "Problem Set 3 Solutions"
+format: pdf
+---
+
+1. 
+
+```{r, echo = FALSE, eval = TRUE}
+Y <- matrix(c(0.5, 2, 0.5, 2, 0.5, 1, 1, 0.5), 
+            nrow = 4, ncol = 2)
+x <- seq(0.01, 6, by = 0.01)
+```
+
+
+(a) 
+
+```{r, echo = TRUE, eval = TRUE}
+A <- matrix(0, nrow = 4, ncol = length(x))
+```
+
+(b) 
+
+```{r, echo = TRUE, eval = TRUE}
+for (i in 1:4) {
+  A[i, ] <- dgamma(x, shape = Y[i, 1], rate = Y[i, 2])
+}
+```
+
+(c)
+
+The maximum observed density value is `r max(A)`.
+
+(d) 
+
+```{r, echo = FALSE, eval = TRUE}
+plot(x, x, type = "n", ylim = c(0, max(A)), ylab = "Density")
+for (i in 1:4) {
+  lines(x, A[i, ], col = i)
+}
+legend("topright", col = 1:4, 
+       legend = c("(0.5, 0.5)", "(2, 1)", "(0.5, 1)", "(2, 0.5)"), lty = 1,
+       title = "(Shape, Rate)")
+```
+
+(e)
+
+```{r, eval = TRUE, echo = TRUE}
+maxx <- c(x[which.max(A[1, ])], x[which.max(A[2, ])], 
+          x[which.max(A[3, ])], x[which.max(A[4, ])])
+```
+
+(f) 
+
+```{r, eval = TRUE, echo = TRUE}
+modex <- ifelse(Y[, 1] < 1, 0, (Y[, 1] - 1)/Y[, 2])
+```
+
+(g)
+
+```{r, eval = TRUE, echo = FALSE}
+Y <- matrix(c(0.5, 2, 0.5, 2, 0.5, 1, 1, 0.5, modex, maxx), 
+            nrow = 4, ncol = 4)
+colnames(Y) <- c("Shape", "Rate", "Mode", "Approximate Mode")
+row.names(Y) <- c("Choice 1", "Choice 2", "Choice 3", "Choice 4")
+knitr::kable(Y, digits = 2)
+```
+
+(g) 
+
+The mode and approximate mode columns are similar but not exactly the same - they differ slightly in the cases where the mode is $0$ because our `x` vector didn't include $0$.
+
+2. In class, we did a little exercise where we created our own data. Given a vector `x <- seq(1, 9, by = 1)`, we created a vector `y` by adding a random integer between $-3$ and $3$ to each element of `x`,  `y <- x + c(2, 2, -3, 0, -1, -2, 2, 3, 1)`. 
+
+```{r, eval = TRUE, echo = FALSE}
+set.seed(32193829)
+x <- seq(1, 9, by = 1)
+y <- x + c(2, 2, -3, 0, -1, -2, 2, 3, 1)
+```
+
+
+(a) 
+
+```{r, eval = TRUE, echo = TRUE}
+Y <- matrix(NA, nrow = length(y), ncol = 100)
+for (i in 1:100) {
+  Y[, i] <- sample((-3):3, length(x), replace = TRUE)
+}
+```
+
+
+(b) 
+
+Each row of `Y` is similar to what we did in class insofar as it takes a vector of fixed numbers, in this case all zeros, and adds a random number between -3 and 3 to each one.
+
+(c) 
+
+```{r, eval = TRUE, echo = TRUE}
+W <- Z <- matrix(NA, nrow = length(y), ncol = 100)
+Z[1, ] <- Y[1, ]
+Z[2, ] <- (Y[1, ] + Y[2, ])/2
+Z[3, ] <- (Y[2, ] + Y[3, ])/2
+Z[4, ] <- (Y[3, ] + Y[4, ])/2
+Z[5, ] <- (Y[4, ] + Y[5, ])/2
+Z[6, ] <- (Y[5, ] + Y[6, ])/2
+Z[7, ] <- (Y[6, ] + Y[7, ])/2
+Z[8, ] <- (Y[7, ] + Y[8, ])/2
+Z[9, ] <- (Y[8, ] + Y[9, ])/2
+W[1, ] <- Y[1, ]
+W[2, ] <- (Y[1, ] + Y[2, ])/2
+W[3, ] <- (Y[1, ] + Y[2, ] + Y[3, ])/3
+W[4, ] <- (Y[2, ] + Y[3, ] + Y[4, ])/3
+W[5, ] <- (Y[3, ] + Y[4, ] + Y[5, ])/3
+W[6, ] <- (Y[4, ] + Y[5, ] + Y[6, ])/3
+W[7, ] <- (Y[5, ] + Y[6, ] + Y[7, ])/3
+W[8, ] <- (Y[6, ] + Y[7, ] + Y[8, ])/3
+W[9, ] <- (Y[7, ] + Y[8, ] + Y[9, ])/3
+```
+
+(d) 
+
+```{r, eval = TRUE, echo = TRUE}
+ymean <- zmean <- wmean <- rep(NA, 9)
+for (i in 1:9) {
+  ymean[i] <- mean(Y[i, ])
+  zmean[i] <- mean(Z[i, ])
+  wmean[i] <- mean(W[i, ])
+}
+```
+
+(e) 
+
+```{r, eval = TRUE, echo = TRUE}
+ysd <- zsd <- wsd <- rep(NA, 9)
+for (i in 1:9) {
+  ysd[i] <- sd(Y[i, ])
+  zsd[i] <- sd(Z[i, ])
+  wsd[i] <- sd(W[i, ])
+}
+```
+
+(f) 
+
+```{r, eval = TRUE, echo = FALSE}
+par(mfrow = c(1, 2))
+plot(x, ymean, pch = 16, ylim = c(-1, 5), ylab = "Row Means")
+points(x, zmean, pch = 16, col = "blue")
+points(x, wmean, pch = 16, col = "red")
+legend("topleft", col = c("black", "blue", "red"), legend = c("Y", "Z", "W"),
+       pch = 16)
+
+plot(x, ysd, pch = 16,
+     ylim = c(0, 5), ylab = "Row SDs")
+points(x, zsd, pch = 16, col = "blue")
+points(x, wsd, pch = 16, col = "red")
+legend("topright", col = c("black", "blue", "red"), legend = c("Y", "Z", "W"),
+       pch = 16)
+```
